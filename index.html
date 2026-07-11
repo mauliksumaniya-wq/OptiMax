@@ -149,72 +149,69 @@
     <footer class="text-center p-10 text-gray-500 text-sm border-t border-gray-800">
         © 2023 OptiMax AI - BCA Semester 3 Project | Built with TensorFlow.js
     </footer>
+    <!-- Replace your old script tags with these specific versions -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@0.5.0/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/upscaler@0.12.1/dist/browser/upscaler.min.js"></script>
 
-    <!-- AI LIBRARIES -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@latest/dist/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/upscaler@latest/dist/browser/upscaler.min.js"></script>
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const upscaleBtn = document.getElementById('upscaleBtn');
+    const inputImg = document.getElementById('inputImg');
+    const outputImg = document.getElementById('outputImg');
+    const loader = document.getElementById('loader');
+    const resultSection = document.getElementById('resultSection');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const fileNameText = document.getElementById('fileNameText');
 
-    <script>
-        const fileInput = document.getElementById('fileInput');
-        const upscaleBtn = document.getElementById('upscaleBtn');
-        const inputImg = document.getElementById('inputImg');
-        const outputImg = document.getElementById('outputImg');
-        const loader = document.getElementById('loader');
-        const resultSection = document.getElementById('resultSection');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const fileNameText = document.getElementById('fileNameText');
+    // 1. Initialize the AI Upscaler
+    const upscaler = new Upscaler();
 
-        // Initialize the AI Upscaler (Runs in Browser)
-        const upscaler = new Upscaler();
+    // 2. Check if AI is ready
+    console.log("AI Model is loading...");
 
-        // Handle Image Selection
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    inputImg.src = event.target.result;
-                    fileNameText.innerText = file.name;
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                inputImg.src = event.target.result;
+                fileNameText.innerText = file.name;
+                // Wait a second for the image to load in the browser memory
+                setTimeout(() => {
                     upscaleBtn.disabled = false;
-                    // Reset UI
-                    resultSection.classList.add('hidden');
-                }
-                reader.readAsDataURL(file);
+                }, 1000);
             }
-        });
+            reader.readAsDataURL(file);
+        }
+    });
 
-        // Handle AI Processing
-        upscaleBtn.addEventListener('click', async () => {
-            loader.classList.remove('hidden');
-            upscaleBtn.disabled = true;
-            upscaleBtn.innerText = "Processing...";
+    upscaleBtn.addEventListener('click', async () => {
+        loader.classList.remove('hidden');
+        upscaleBtn.disabled = true;
+        upscaleBtn.innerText = "AI is Working...";
 
-            try {
-                // The AI Magic
-                // Patching is enabled to ensure Windows 7 browsers don't crash
-                const upscaledImgSrc = await upscaler.upscale(inputImg.src, {
-                    patchSize: 64, 
-                    padding: 2
-                });
+        try {
+            // Using a smaller patch size for Windows 7 stability
+            const upscaledImgSrc = await upscaler.upscale(inputImg.src, {
+                patchSize: 48, 
+                padding: 2
+            });
 
-                // Set Result
-                outputImg.src = upscaledImgSrc;
-                downloadBtn.href = upscaledImgSrc;
-                
-                // Show Result Section
-                resultSection.classList.remove('hidden');
-                resultSection.scrollIntoView({ behavior: 'smooth' });
+            outputImg.src = upscaledImgSrc;
+            downloadBtn.href = upscaledImgSrc;
+            resultSection.classList.remove('hidden');
+            resultSection.scrollIntoView({ behavior: 'smooth' });
 
-            } catch (error) {
-                console.error(error);
-                alert("Processing failed. Your image might be too large for the browser's memory.");
-            } finally {
-                loader.classList.add('hidden');
-                upscaleBtn.disabled = false;
-                upscaleBtn.innerText = "⚡ Start AI Enhancement";
-            }
-        });
-    </script>
+        } catch (error) {
+            console.error("AI Error:", error);
+            alert("AI Error: Your browser or PC might be struggling. Try a very small image first.");
+        } finally {
+            loader.classList.add('hidden');
+            upscaleBtn.disabled = false;
+            upscaleBtn.innerText = "⚡ Start AI Enhancement";
+        }
+    });
+</script>
 </body>
 </html>
