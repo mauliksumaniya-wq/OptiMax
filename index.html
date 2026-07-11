@@ -3,117 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OptiMax AI | Fixed Version</title>
+    <title>OptiMax AI | BCA Project</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #0f172a; color: white; font-family: sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        body { background: #020617; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .success-glow { box-shadow: 0 0 20px rgba(34, 197, 94, 0.2); }
     </style>
 </head>
-<body class="p-5 flex flex-col items-center">
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="max-w-2xl w-full glass p-8 rounded-2xl text-center mt-10">
-        <h1 class="text-3xl font-bold text-blue-400 mb-2">OptiMax AI</h1>
-        <p class="text-gray-400 mb-6 text-sm">Image Upscaler for BCA Semester 3 Project</p>
+    <div class="max-w-xl w-full glass p-8 rounded-3xl text-center shadow-2xl">
+        <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500 mb-2">OptiMax AI</h1>
+        <p class="text-gray-400 mb-8 text-sm uppercase tracking-widest">Image Quality Enhancer</p>
 
-        <!-- Status Light -->
-        <div class="mb-5 flex justify-center items-center gap-2">
-            <div id="statusDot" class="w-3 h-3 bg-red-500 rounded-full"></div>
-            <span id="statusText" class="text-xs text-gray-400">Loading AI Libraries...</span>
+        <!-- Status Indicator -->
+        <div id="statusBox" class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-slate-800 border border-slate-700 mb-8">
+            <div id="statusDot" class="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
+            <span id="statusText" class="text-xs font-medium text-gray-300">Connecting to AI Engine...</span>
         </div>
 
-        <input type="file" id="fileInput" class="hidden" accept="image/*">
-        <button onclick="document.getElementById('fileInput').click()" class="bg-gray-700 px-5 py-2 rounded-lg mb-4 hover:bg-gray-600">Select Image</button>
-        
-        <p id="fileName" class="text-xs text-blue-300 mb-4"></p>
+        <!-- Upload Area -->
+        <div class="space-y-4">
+            <input type="file" id="fileInput" class="hidden" accept="image/*">
+            <button onclick="document.getElementById('fileInput').click()" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-xl transition-all border border-slate-500 text-sm">
+                📁 Select Blurry Image
+            </button>
+            
+            <p id="fileName" class="text-xs text-indigo-400 font-mono italic"></p>
 
-        <button id="upscaleBtn" disabled class="w-full bg-blue-600 disabled:bg-gray-800 p-4 rounded-xl font-bold shadow-lg">
-            ⚡ Start AI Enhancement
-        </button>
+            <button id="upscaleBtn" disabled class="w-full bg-indigo-600 disabled:bg-slate-800 disabled:text-gray-500 py-4 rounded-xl font-bold text-lg shadow-lg transition-all">
+                ⚡ Enhance Pixels
+            </button>
+        </div>
 
-        <div id="loader" class="hidden mt-4 text-yellow-500 animate-pulse text-sm">AI is processing... please wait...</div>
-
-        <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <p class="text-xs text-gray-500 mb-2 uppercase">Original</p>
-                <img id="inputImg" class="rounded-lg border border-gray-700 w-full">
+        <!-- Result Preview -->
+        <div id="previewArea" class="mt-8 grid grid-cols-2 gap-4 hidden">
+            <div class="space-y-2">
+                <p class="text-[10px] text-gray-500 font-bold uppercase text-left">Before</p>
+                <img id="inputImg" class="rounded-lg border border-slate-700">
             </div>
-            <div>
-                <p class="text-xs text-blue-500 mb-2 uppercase">AI Result</p>
-                <img id="outputImg" class="rounded-lg border border-blue-900 w-full">
-                <a id="downloadBtn" class="hidden mt-4 block bg-green-600 p-2 rounded text-sm font-bold">Download Result</a>
+            <div class="space-y-2">
+                <p class="text-[10px] text-indigo-500 font-bold uppercase text-left">AI After</p>
+                <img id="outputImg" class="rounded-lg border border-indigo-500 success-glow">
+            </div>
+        </div>
+
+        <a id="downloadBtn" class="hidden mt-6 block bg-green-600 hover:bg-green-500 p-3 rounded-xl font-bold text-sm transition-all transform active:scale-95">
+            ⬇ Download High Quality Image
+        </a>
+
+        <div id="loader" class="hidden mt-6">
+            <div class="flex items-center justify-center gap-2">
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-.3s]"></div>
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-.5s]"></div>
+                <span class="text-sm text-blue-400 ml-2">AI is regenerating pixels...</span>
             </div>
         </div>
     </div>
 
-    <!-- NEW FIXED LIBRARY LINKS (Using Unpkg CDN) -->
-    <!-- 1. TensorFlow.js Core -->
-    <script src="https://unpkg.com/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
-    <!-- 2. The AI Model -->
-    <script src="https://unpkg.com/@upscalerjs/default-model@0.5.0/dist/index.min.js"></script>
-    <!-- 3. The Upscaler Engine -->
-    <script src="https://unpkg.com/upscaler@0.12.1/dist/browser/upscaler.min.js"></script>
+    <!-- SCRIPT LOADING STRATEGY -->
+    <!-- We load TFJS first -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <!-- Then the model -->
+    <script src="https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@0.5.0/dist/index.min.js"></script>
+    <!-- Finally the Upscaler -->
+    <script src="https://cdn.jsdelivr.net/npm/upscaler@0.12.1/dist/browser/upscaler.min.js"></script>
 
     <script>
-        // Check if libraries loaded correctly
-        window.onload = function() {
-            if (typeof Upscaler !== 'undefined') {
-                document.getElementById('statusDot').classList.replace('bg-red-500', 'bg-green-500');
-                document.getElementById('statusText').innerText = "AI Ready to Work!";
-                console.log("Success: Upscaler Loaded!");
-            } else {
-                document.getElementById('statusText').innerText = "Error: Libraries blocked. Use a different browser.";
-                console.error("Error: Upscaler library failed to load.");
-            }
-        };
-
-        const fileInput = document.getElementById('fileInput');
         const upscaleBtn = document.getElementById('upscaleBtn');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const fileInput = document.getElementById('fileInput');
         const inputImg = document.getElementById('inputImg');
         const outputImg = document.getElementById('outputImg');
         const loader = document.getElementById('loader');
         const downloadBtn = document.getElementById('downloadBtn');
 
-        let upscalerInstance;
+        let myUpscaler = null;
 
-        try {
-            upscalerInstance = new Upscaler();
-        } catch (e) {
-            console.log("Waiting for library...");
+        // FUNCTION TO INITIALIZE AI
+        function initAI() {
+            try {
+                if (typeof Upscaler !== 'undefined') {
+                    myUpscaler = new Upscaler();
+                    statusDot.classList.replace('bg-yellow-500', 'bg-green-500');
+                    statusDot.classList.remove('animate-pulse');
+                    statusText.innerText = "AI System Active";
+                    console.log("AI Ready!");
+                } else {
+                    setTimeout(initAI, 1000); // Try again in 1 second
+                }
+            } catch (err) {
+                console.error("Waiting for libraries...");
+                setTimeout(initAI, 1000);
+            }
         }
 
+        // Start looking for the library
+        initAI();
+
+        // Handle Image Choice
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                document.getElementById('fileName').innerText = "Selected: " + file.name;
+                document.getElementById('fileName').innerText = "Target: " + file.name;
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     inputImg.src = event.target.result;
-                    upscaleBtn.disabled = false;
+                    document.getElementById('previewArea').classList.remove('hidden');
+                    if(myUpscaler) upscaleBtn.disabled = false;
                 };
                 reader.readAsDataURL(file);
             }
         });
 
+        // Handle the AI Work
         upscaleBtn.addEventListener('click', async () => {
+            // Safety Check: Is the AI library ready?
+            if (!myUpscaler) {
+                alert("AI Engine is still warming up. Please wait 5 seconds.");
+                return;
+            }
+
             loader.classList.remove('hidden');
             upscaleBtn.disabled = true;
-            
+            downloadBtn.classList.add('hidden');
+
             try {
-                // Upscale using smaller patches for Windows 7 memory safety
-                const result = await upscalerInstance.upscale(inputImg.src, {
+                // The actual upscale call
+                // patchSize: 48 keeps it stable on Windows 7
+                const upscaledImgSrc = await myUpscaler.upscale(inputImg.src, {
                     patchSize: 48,
                     padding: 2
                 });
 
-                outputImg.src = result;
-                downloadBtn.href = result;
-                downloadBtn.download = "optimax_enhanced.png";
+                outputImg.src = upscaledImgSrc;
+                downloadBtn.href = upscaledImgSrc;
+                downloadBtn.download = "optimax_highres.png";
+                
                 downloadBtn.classList.remove('hidden');
-
-            } catch (err) {
-                console.error(err);
-                alert("AI Error: " + err.message);
+            } catch (error) {
+                console.error(error);
+                alert("AI Error: " + error.message + ". Try a smaller image.");
             } finally {
                 loader.classList.add('hidden');
                 upscaleBtn.disabled = false;
